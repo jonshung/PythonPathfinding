@@ -1,11 +1,11 @@
 from sys import maxsize
 
 class Node:
-    block: int = -9 # 0 -> +inf: geometry, -1: path, -9: none, -10: expanded but not visited
+    block: int = -9 # 0 -> +inf: geometry, -1: node on result path, -9: open node, -10: expanded but not visited
     anchor: bool = False
-    cost: float = maxsize
-    visited = False
-    from_node = [-1, -1]
+    cost: float = maxsize       # depends on the algorithm, for BestFirsts', it is the PATH-COST, i.e cost from start -> current node
+    visited = False             # trivial property for reached state 
+    from_node = [-1, -1]        # coordinate of parent node
 
     def __repr__(self) -> str:
         return str(self.block)
@@ -15,9 +15,9 @@ class Node:
         self.block = block_vl
 
 class Graph:
-    grid: list[Node]
-    dim: list[int]
-    geo_size: int = 0
+    grid: list[Node]            # a M x N, 1D array containing informations of each node
+    dim: list[int]              # dimension, dim[0] = x, dim[1] = y
+    geo_size: int = 0           # number of geometries on the graph
 
     def __repr__(self) -> str:
         stri = ""

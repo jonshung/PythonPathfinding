@@ -17,8 +17,8 @@ def BestFirst(dat: InputData, grid: Graph, f) -> bool:
         u = prio_queue.get()[1]
         node = grid.grid[grid.to_local_coord(u)]
         node.block = -1
-        if(u[0] == dat.end[0] and u[1] == dat.end[1]):
-            return True
+        if(u[0] == dat.end[0] and u[1] == dat.end[1]):          # for UCS, this statement is necessary
+            return True                                         # in order to convert to Dijkstra, do not stop at the goal
         for i in range(-1, 2):
             for j in range(-1, 2):
                 adjx = u[0] + j
