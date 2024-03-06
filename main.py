@@ -3,6 +3,7 @@ import graph
 import visualize
 import algorithm
 import gc
+import time
 
 if __name__ == "__main__":
     dat = input.init_data("input.txt")
@@ -12,12 +13,19 @@ if __name__ == "__main__":
     gc.collect()
     #visualize.visualize_3d_graph(gg, [dat.start, dat.end])
 
-    dat1 = input.init_data("input.txt")
-    gg1 = graph.Graph(dat1.dim, dat1.geo_data)
+    dat = input.init_data("input.txt")
+    gg = graph.Graph(dat.dim, dat.geo_data)
 
-    def dynamic_geo_updater(graph_list: list[graph.Graph], dat: list):
-        for g in graph_list:
-            g.partial_reset()
-            g.dynamic_geo(2, 1)
-            algorithm.Astar(dat1, gg1)
-    visualize.updatable([gg1], [dat1], dynamic_geo_updater, 1000)
+    start_time = time.time()
+    algorithm.Astar(dat, gg)
+    end_time = time.time()
+
+    def dynamic_geo_updater(graph: graph.Graph, input_data: input.InputData) -> float:
+        graph.partial_reset()
+        graph.dynamic_geo(2, 0)
+        start_time = time.time()
+        algorithm.Astar(input_data, graph)
+        end_time = time.time()
+        return end_time - start_time
+
+    visualize.updatable([gg], [dat], dynamic_geo_updater, end_time - start_time, 1000, True)
