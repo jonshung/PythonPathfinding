@@ -84,7 +84,7 @@ def build_voxel_map(grid: Graph, checkpoints: list[list[int]], show_expansion=Fa
     ex_colors = explode(colors)
     return [ex_voxels, ex_colors]
 
-def show_graph(grid: Graph, input_data: InputData, show_expansion=False, time=0.0, node_scale=0.95):
+def show_graph(grid: Graph, input_data: InputData, time=0.0, show_expansion=False, node_scale=0.95):
     checkpoints = [input_data.start]
     for x in input_data.pickup:
         checkpoints.append(x)

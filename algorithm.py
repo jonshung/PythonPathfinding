@@ -29,7 +29,7 @@ def BestFirst(dat: InputData, grid: Graph, f, evalOrder=0) -> bool:
         if(evalOrder == 0 and u[0] == dat.end[0] and u[1] == dat.end[1]):          # for UCS, this statement is necessary
             return True                                         # in order to convert to Dijkstra, do not stop at the goal
         for i in range(-1, 2):
-            for j in range(-1, 2):
+            for j in range(1, -2, -1):
                 adjx = u[0] + i
                 adjy = u[1] + j
                 new_dest = [adjx, adjy]
@@ -55,7 +55,7 @@ def BestFirst(dat: InputData, grid: Graph, f, evalOrder=0) -> bool:
                         new_node.block = -1
                         return True
                     prio_queue.put((fn[1], new_dest))
-                elif(cond and new_node.block == -10 and new_node.cost > fn[0]):
+                elif(cond and new_node.visited and new_node.block == -10 and new_node.cost > fn[0]):
                     new_node.cost = fn[0]
                     new_node.from_node = u
 
@@ -67,8 +67,7 @@ def BFS(dat: InputData, grid: Graph) -> bool:
         d_y = abs(u[1] - n[1])
         mod = 1
         if(d_x == d_y and d_x != 0):
-            mod = 1.5   # 1.4 should be closer, and should be choose on large maps
-                        # 1.5 is Okay on small maps, but will introduce a diverted error, 
+            mod = 1.41
         g = grid.grid[grid.to_local_coord(u)].cost + mod
         return (g, 0) # cost = 0 for all,
                       # we should have f(n) = depth, since we are putting frontierees in a priority queue
@@ -95,7 +94,7 @@ def DFS(dat: InputData, grid: Graph) -> bool:
         node = grid.grid[grid.to_local_coord(u)]
         node.block = -1
         for i in range(-1, 2):
-            for j in range(-1, 2):
+            for j in range(1, -2, -1):
                 adjx = u[0] + j
                 adjy = u[1] + i
                 new_dest = [adjx, adjy]
@@ -120,7 +119,7 @@ def DFS(dat: InputData, grid: Graph) -> bool:
                     d_y = abs(u[1] - new_dest[1])
                     mod = 1
                     if(d_x == d_y and d_x != 0):
-                        mod = 1.5 
+                        mod = 1.41
                     g = grid.grid[grid.to_local_coord(u)].cost + mod
 
                     new_node.cost = g
@@ -138,8 +137,7 @@ def UCS(dat: InputData, grid: Graph) -> bool:
         d_y = abs(u[1] - n[1])
         mod = 1
         if(d_x == d_y and d_x != 0):
-            mod = 1.5   # 1.4 should be closer, and should be choose on large maps
-                        # 1.5 is Okay on small maps, but will introduce a diverted error, 
+            mod = 1.41
         g = grid.grid[grid.to_local_coord(u)].cost + mod
         return (g, g)
     return BestFirst(dat, grid, eval)
@@ -150,8 +148,7 @@ def GreedyBFS(dat: InputData, grid: Graph) -> bool:
         d_y = abs(u[1] - n[1])
         mod = 1
         if(d_x == d_y and d_x != 0):
-            mod = 1.5   # 1.4 should be closer, and should be choose on large maps
-                        # 1.5 is Okay on small maps, but will introduce a diverted error, 
+            mod = 1.41
         g = grid.grid[grid.to_local_coord(u)].cost + mod
 
         dist_x = n[0] - e[0]
@@ -167,7 +164,7 @@ def Dijkstra(dat: InputData, grid: Graph) -> bool:
         d_y = abs(u[1] - n[1])
         mod = 1
         if(d_x == d_y and d_x != 0):
-            mod = 1.5
+            mod = 1.41
         g = grid.grid[grid.to_local_coord(u)].cost + mod
         return (g, g)
     return BestFirst(dat, grid, eval, 2) # eval pos = 2 will cause the algorithm to run forever, until no more node is to be expanded
@@ -178,8 +175,7 @@ def Astar(dat: InputData, grid: Graph) -> bool:
         d_y = abs(u[1] - n[1])
         mod = 1
         if(d_x == d_y and d_x != 0):
-            mod = 1.5   # 1.4 should be closer, and should be choose on large maps
-                        # 1.5 is Okay on small maps, but will introduce a diverted error, 
+            mod = 1.41                  # 1.5 overestimate diagonal movement, might result in unwanted movement
         g = grid.grid[grid.to_local_coord(u)].cost + mod
 
         dist_x = n[0] - e[0]
