@@ -1,7 +1,8 @@
 from sys import maxsize
+import copy
 
 class Node:
-    block: int = -9 # 0 -> +inf: geometry, -1: node on result path, -9: open node, -10: expanded but not visited
+    block: int = -9 # 0 -> +inf: geometry, -1: node on result path, -9: open node, -10: visited but not expanded i.e not popped
     anchor: bool = False
     cost: float = maxsize       # depends on the algorithm, for BestFirsts', it is the PATH-COST, i.e cost from start -> current node
     visited = False             # trivial property for reached state 
@@ -14,10 +15,11 @@ class Node:
         self.cost = cost_vl
         self.block = block_vl
 
+move_direction = [[0, 1], [1, 0], [0, -1], [-1, 0]]
 class Graph:
     grid: list[Node]            # a M x N, 1D array containing informations of each node
     dim: list[int]              # dimension, dim[0] = x, dim[1] = y
-    geo_size: int = 0           # number of geometries on the graph
+    geo_data: list
 
     def __repr__(self) -> str:
         stri = ""
@@ -27,15 +29,15 @@ class Graph:
             stri += "\n"
         return stri
 
-    def __init__(self, dim_vl: list[int], geo_size_vl: int, geo_data_vl: list[list[list[int]]]) -> None:
+    def __init__(self, dim_vl: list[int], geo_data_vl: list[list[list[int]]]) -> None:
         self.dim = dim_vl
         self.dim[0] += 1
         self.dim[1] += 1
         for i in range(len(self.dim)):
             if self.dim[i] <= 0:
                 self.dim[i] = 1
-        self.geo_size = geo_size_vl
-        self.construct(geo_size_vl, geo_data_vl)
+        self.geo_data = geo_data_vl
+        self.construct(len(geo_data_vl), geo_data_vl)
 
     def _to_local_coord(self, x: int, y: int) -> int:
         return x % (self.dim[0]) + y * (self.dim[0])
@@ -55,7 +57,7 @@ class Graph:
     
     def _can_move_straight(self, x: int, y: int) -> bool:
         local = self._to_local_coord(x, y)
-        return  self._in_boundary(x, y) and self.grid[local].visited == False and self.grid[local].block <= -9
+        return  self._in_boundary(x, y)  and self.grid[local].block <= -9
     
     def can_move_straight(self, pos: list[int]) -> bool:
         if(len(pos) < 2):
@@ -67,9 +69,9 @@ class Graph:
             return False
         #check going through wall
         unblocked = (self.grid[self._to_local_coord(to_x, to_y)].block <= -9) and \
-                    (self.grid[self._to_local_coord(from_x, to_y)].block <= -9) and \
-                    (self.grid[self._to_local_coord(to_x, from_y)].block <= -9)
-        return self.grid[self._to_local_coord(to_x, to_y)].visited == False and unblocked
+                    ((self.grid[self._to_local_coord(from_x, to_y)].block <= -9) or \
+                    (self.grid[self._to_local_coord(to_x, from_y)].block <= -9))
+        return unblocked
     
     def can_move_diagonal(self, from_pos: list[int], to_pos: list[int]) -> bool:
         if(len(from_pos) < 2 or len(to_pos) < 2):
@@ -123,3 +125,37 @@ class Graph:
                 dest = tpos.copy()
                 self.line(i, dist_x, dist_y, dest)
                 tpos = pos
+
+    def symmetrical_translation(self, x2, y2):
+        x_translation = int(x2)
+        y_translation = int(y2)
+        changed = False
+        if(x2 >= (self.dim[0] - 1)):
+            x_translation = x2 - self.dim[0] + 2
+            changed = True
+        if(x2 <= 0):
+            x_translation = self.dim[0] - 2 + x2
+            changed = True
+        if(y2 >= (self.dim[1] - 1)):
+            y_translation = y2 - self.dim[1] + 2
+            changed = True
+        if(y2 <= 0):
+            y_translation = self.dim[1] - 2 + y2
+            changed = True
+        return (self.symmetrical_translation(x_translation, y_translation)) if changed else [x_translation, y_translation]
+
+    # direction 0: up, 1: right, 2: down, 3: left
+    def dynamic_geo(self, direction, h):
+        move_vector = move_direction[direction]
+        t_grid = [Node(maxsize, -9) for i in range((self.dim[0] * self.dim[1] + 1))]
+
+        for i in range(1, self.dim[0]):
+            for j in range(1, self.dim[1]):
+                node = self.grid[self._to_local_coord(i, j)]
+                if(node.block >= 0):
+                    d_x = move_vector[0] * h + i
+                    d_y = move_vector[1] * h + j
+                    translation = self.symmetrical_translation(d_x, d_y)
+                    t_grid[self.to_local_coord(translation)].block = node.block
+
+        self.grid = t_grid
