@@ -67,19 +67,18 @@ def build_voxel_map(grid: Graph, checkpoints: list[list[int]], show_expansion=Fa
 
     if(checkpoints[-1] != None and len(checkpoints[-1]) >= 2):
         traceback = checkpoints[-1]
-        # in case path not found, still display start, stop
-        vox_grid[traceback[0], traceback[1], 1] = True
-        vox_grid[checkpoints[0][0], checkpoints[0][1], 1] = True
-
         while(grid.in_boundary(traceback)):
             vox_grid[traceback[0], traceback[1], 0] = False    # undo underlying node of path, saving compute resource
             vox_grid[traceback[0], traceback[1], 1] = True
             colors[traceback[0], traceback[1], 1] = rgbtostring([0, 0, 255, 255])
             n_node = grid.grid[grid.to_local_coord(traceback)]
             traceback = n_node.from_node
-        # recolor start and end
-        colors[checkpoints[-1][0], checkpoints[-1][1], 1] = rgbtostring([255, 0, 255])
-        colors[checkpoints[0][0], checkpoints[0][1], 1] = rgbtostring([255, 0, 255])
+    
+    # recolor checkpoints
+    for checkpoint in checkpoints:
+        vox_grid[checkpoint[0], checkpoint[1], 1] = True
+        colors[checkpoint[0], checkpoint[1], 1] = rgbtostring([255, 0, 255])
+
     ex_voxels = explode(vox_grid)
     ex_colors = explode(colors)
     return [ex_voxels, ex_colors]

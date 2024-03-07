@@ -107,6 +107,9 @@ class Graph:
             self.grid[i].cost = maxsize
             self.grid[i].visited = False
             self.grid[i].from_node = [-1, -1]
+            if(self.grid[i].block >= 0):
+                continue
+            self.grid[i].block = -9
 
     def construct(self, geo_size: int, geo_data: list[list[list[int]]]) -> None:
         self.grid = [Node(maxsize, -9) for i in range((self.dim[0] * self.dim[1] + 1))]

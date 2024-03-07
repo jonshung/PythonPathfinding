@@ -18,12 +18,13 @@ def BestFirst(dat: InputData, grid: Graph, f, evalOrder=0) -> bool:
     if(grid.in_boundary(dat.start) == False or grid.in_boundary(dat.end) == False):
         return False
     grid.grid[grid.to_local_coord(dat.start)].visited = True
-    grid.grid[grid.to_local_coord(dat.start)].block = -1
     grid.grid[grid.to_local_coord(dat.start)].cost = 0
 
     while(prio_queue.empty() == False):
         u = prio_queue.get()[1]
         node = grid.grid[grid.to_local_coord(u)]
+        if(node.visited and node.block == -1):
+            continue
         node.block = -1
         
         if(evalOrder == 0 and u[0] == dat.end[0] and u[1] == dat.end[1]):          # for UCS, this statement is necessary
@@ -41,12 +42,14 @@ def BestFirst(dat: InputData, grid: Graph, f, evalOrder=0) -> bool:
                 else:
                     if(grid.can_move_straight(new_dest)):
                         cond = True
+                if(cond == False):
+                    continue
 
                 id = grid.to_local_coord(new_dest)
                 new_node = grid.grid[id]
                 fn = f(grid, dat.start, dat.end, u, new_dest)
 
-                if(cond and new_node.visited == False):
+                if(new_node.visited == False or (new_node.block == -10 and new_node.cost > fn[0])):
                     new_node.visited = True
                     new_node.block = -10
                     new_node.from_node = u
@@ -55,9 +58,6 @@ def BestFirst(dat: InputData, grid: Graph, f, evalOrder=0) -> bool:
                         new_node.block = -1
                         return True
                     prio_queue.put((fn[1], new_dest))
-                elif(cond and new_node.visited and new_node.block == -10 and new_node.cost > fn[0]):
-                    new_node.cost = fn[0]
-                    new_node.from_node = u
 
     return False
 
@@ -184,26 +184,3 @@ def Astar(dat: InputData, grid: Graph) -> bool:
         h = sqrt(pow(abs(dist_x), 2) + pow(abs(dist_y), 2))   # Pythagorean distance, much more feasible
         return (g, h + g)
     return BestFirst(dat, grid, eval)
-
-def TSP(dat: InputData, grid: Graph):
-    # atleast NP-intermediate, most likely NP-hard
-    cost = dict() # cost from node i -> j
-    
-    checkpoints = [dat.start]
-    for x in dat.pickup:
-        checkpoints.append(x)
-    checkpoints.append(dat.end)
-    for node in checkpoints:
-        dat2 = copy.deepcopy(dat)
-        dat2.start = node
-        if node[0] != dat.start[0] and node[1] != dat.start[1]:
-            dat2.pickup.append(dat.start)
-        grid.partial_reset()
-        node_queue = PriorityQueue()
-        Dijkstra(dat2, grid)
-        # put all visiting checkpoints in queue
-        for visit_dest in dat2.pickup:
-            node_queue.put((grid.grid[grid.to_local_coord(visit_dest)].cost, visit_dest))
-        # put end in queue
-        node_queue.put((grid.grid[grid.to_local_coord(dat2.end)].cost, dat2.end))
-        cost[node] = node_queue
