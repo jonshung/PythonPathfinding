@@ -38,8 +38,9 @@ def plot_voxel(voxels, colors, labels, scale):
 def build_voxel_map(grid: Graph, checkpoints: list[list[int]], show_expansion=False) -> list:
     dim = grid.dim.copy()
 
-    vox_grid = np.zeros((dim[0], dim[1], 2))
-    colors = np.ndarray((dim[0], dim[1], 2), dtype=object)
+    z = 1 if len(dim) < 3 else dim[2]
+    vox_grid = np.zeros((dim[0], dim[1], z))
+    colors = np.ndarray((dim[0], dim[1], z), dtype=object)
     rstr = [['white']] * len(grid.geo_data)
     for i in range(len(grid.geo_data)):
         r = list(np.random.choice(range(127), size=3))
@@ -69,15 +70,15 @@ def build_voxel_map(grid: Graph, checkpoints: list[list[int]], show_expansion=Fa
         traceback = checkpoints[-1]
         while(grid.in_boundary(traceback)):
             vox_grid[traceback[0], traceback[1], 0] = False    # undo underlying node of path, saving compute resource
-            vox_grid[traceback[0], traceback[1], 1] = True
-            colors[traceback[0], traceback[1], 1] = rgbtostring([0, 0, 255, 255])
+            vox_grid[traceback[0], traceback[1], z - 1] = True
+            colors[traceback[0], traceback[1], z - 1] = rgbtostring([0, 0, 255, 255])
             n_node = grid.grid[grid.to_local_coord(traceback)]
             traceback = n_node.from_node
     
     # recolor checkpoints
     for checkpoint in checkpoints:
-        vox_grid[checkpoint[0], checkpoint[1], 1] = True
-        colors[checkpoint[0], checkpoint[1], 1] = rgbtostring([255, 0, 255])
+        vox_grid[checkpoint[0], checkpoint[1], z - 1] = True
+        colors[checkpoint[0], checkpoint[1], z - 1] = rgbtostring([255, 0, 255])
 
     ex_voxels = explode(vox_grid)
     ex_colors = explode(colors)

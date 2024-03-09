@@ -84,7 +84,7 @@ def held_karp(dists):
     # Calculate optimal cost
     res = []
     for k in range(1, n):
-        res.append((C[(bits, k)][0] + dists[k][0], k))
+        res.append((C[(bits, k)][0], k))
     opt, parent = min(res)
 
     # Backtrack to find full path
@@ -149,6 +149,7 @@ def tsp(dat: InputData, grid: Graph, order: list) -> bool:
 def run(dat: InputData, grid: Graph):
     set_cost = MinCostSet(dat, grid)
     algo_res = held_karp(set_cost)
+    print(algo_res)
     res = tsp(dat, grid, algo_res[1])
     if res:
         grid.grid[grid.to_local_coord(dat.end)].cost = algo_res[0]
