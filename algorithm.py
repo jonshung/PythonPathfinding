@@ -58,7 +58,7 @@ def BestFirst(dat: InputData, grid: Graph, f, evalOrder=0) -> bool:
                         new_node.block = -1
                         return True
                     prio_queue.put((fn[1], new_dest))
-
+    # grid.grid[grid.to_local_coord(dat.end)].cost = -1
     return False
 
 def BFS(dat: InputData, grid: Graph) -> bool:

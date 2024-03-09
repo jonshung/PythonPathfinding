@@ -84,7 +84,7 @@ def held_karp(dists):
     # Calculate optimal cost
     res = []
     for k in range(1, n):
-        res.append((C[(bits, k)][0] + dists[k][0], k))
+        res.append((C[(bits, k)][0], k))
     opt, parent = min(res)
 
     # Backtrack to find full path
@@ -100,21 +100,21 @@ def held_karp(dists):
 
     return opt, list(reversed(path))
 
-def tsp(dat: InputData, grid: Graph, order: list) -> bool:
+def reconstruct_path(dat: InputData, grid: Graph, order: list) -> bool:
     checkpoints = [dat.start]
     for x in dat.pickup:
         checkpoints.append(x)
     checkpoints.append(dat.end)
 
     path = []
-    total_cost = 0
+    starting_cost = 0
     grid.partial_reset()
 
-    for i in range(len(order) - 1, -1, -1):
-        if(i == 0):
+    for i in range(len(order)):
+        if(i == (len(order) - 1)):
             continue
-        start = checkpoints[order[i - 1]]
-        end = checkpoints[order[i]]
+        start = checkpoints[order[i]]
+        end = checkpoints[order[i +  1]]
         dat2 = copy.deepcopy(dat)
 
         dat2.start = start
@@ -122,35 +122,33 @@ def tsp(dat: InputData, grid: Graph, order: list) -> bool:
         if(Astar(dat2, grid) == False):
             return False
 
+        t_path = []
         traceback = dat2.end
-        total_cost += grid.grid[grid.to_local_coord(traceback)].cost
-        # in case path not found, still display start, stop
         while(grid.in_boundary(traceback)):
-            path.append(traceback)
             n_node = grid.grid[grid.to_local_coord(traceback)]
+            t_path.append((round(starting_cost + n_node.cost, 2), traceback))
             traceback = n_node.from_node
+        t_path.reverse()
+        path.extend(t_path)
+        
+        starting_cost += grid.grid[grid.to_local_coord(dat2.end)].cost
         grid.partial_reset()
+    
     for node_i in range(len(path)):
-        node = path[node_i]
-        tgt = grid.grid[grid.to_local_coord(node)]
+        node_data = path[node_i]
+        tgt = grid.grid[grid.to_local_coord(node_data[1])]
         tgt.visited = True
         tgt.block = -1
-        if(node == path[-1]):
-            continue
-        tgt.from_node = path[node_i + 1]
-
-    if(len(path) > 0):
-        if(dat.end != path[0]):
-            dat.pickup.remove(path[0])
-            dat.pickup.append(dat.end)
-        dat.end = path[0]
+        tgt.cost = node_data[0]
+        if(node_i > 0):
+            if(path[node_i - 1][1] != node_data[1]):
+                tgt.from_node = path[node_i - 1][1]
     return True
 
-def run(dat: InputData, grid: Graph):
+def tsp(dat: InputData, grid: Graph):
     set_cost = MinCostSet(dat, grid)
     algo_res = held_karp(set_cost)
-    print(algo_res)
-    res = tsp(dat, grid, algo_res[1])
+    res = reconstruct_path(dat, grid, algo_res[1])
     if res:
         grid.grid[grid.to_local_coord(dat.end)].cost = algo_res[0]
         return True

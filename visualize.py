@@ -17,7 +17,7 @@ def explode(data):
 def rgbtostring(rgba: list):
     if(len(rgba) < 4):
         rgba.append(255)
-    return '#%02x%02x%02x%02x' % (rgba[0], rgba[1], rgba[2], rgba[3])
+    return '#%02x%02x%02x%02x' % (abs(rgba[0]), abs(rgba[1]), abs(rgba[2]), abs(rgba[3]))
 
 def plot_voxel(voxels, colors, labels, scale):
     x, y, z = np.indices(np.array(voxels.shape) + 1).astype(float) // 2
@@ -68,21 +68,43 @@ def build_voxel_map(grid: Graph, checkpoints: list[list[int]], show_expansion=Fa
 
     if(checkpoints[-1] != None and len(checkpoints[-1]) >= 2):
         traceback = checkpoints[-1]
-        while(grid.in_boundary(traceback)):
+        max_z = grid.grid[grid.to_local_coord(traceback)].cost
+        while(grid.in_boundary(traceback) and max_z > 0):
             vox_grid[traceback[0], traceback[1], 0] = False    # undo underlying node of path, saving compute resource
-            vox_grid[traceback[0], traceback[1], z - 1] = True
-            colors[traceback[0], traceback[1], z - 1] = rgbtostring([0, 0, 255, 255])
+
             n_node = grid.grid[grid.to_local_coord(traceback)]
+            d_z = ramp_vl(n_node.cost, max_z, z)
+            vox_grid[traceback[0], traceback[1], 0:(d_z + 1)] = True
+
+            colors[traceback[0], traceback[1], 0:(d_z + 1)] = rgbtostring(lerp_color(n_node.cost / max_z, [0, 0, 255, 255], [255, 0, 0, 255]))
             traceback = n_node.from_node
     
     # recolor checkpoints
     for checkpoint in checkpoints:
-        vox_grid[checkpoint[0], checkpoint[1], z - 1] = True
-        colors[checkpoint[0], checkpoint[1], z - 1] = rgbtostring([255, 0, 255])
+        if(checkpoint == checkpoints[0] or checkpoint == checkpoints[-1]):
+            c_col = rgbtostring([255, 0, 255])
+        else:
+            c_col = rgbtostring([0, 255, 0])
+        vox_grid[checkpoint[0], checkpoint[1], 0:z] = True
+        colors[checkpoint[0], checkpoint[1], 0:z] = c_col
 
     ex_voxels = explode(vox_grid)
     ex_colors = explode(colors)
     return [ex_voxels, ex_colors]
+
+def lerp_color(x, col1: list, col2: list):
+    f0 = (col2[0] - col1[0])
+    f1 = (col2[1] - col1[1])
+    f2 = (col2[2] - col1[2])
+    if(len(col1) < 3):
+        col1[3] = 255
+    if(len(col2) < 3):
+        col2[3] = 255
+    f3 = col2[3] - col1[3]
+    return [round(x * f0 + col1[0]), round(x * f1 + col1[1]), round(x * f2 + col1[2]), round(x * f3 + col1[3])]
+
+def ramp_vl(x, max_x, ramps) -> int:
+    return round((x / max_x) * ramps)
 
 def show_graph(grid: Graph, input_data: InputData, time=0.0, show_expansion=False, node_scale=0.95):
     checkpoints = [input_data.start]
