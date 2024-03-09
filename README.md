@@ -1,4 +1,5 @@
 # Python Pathfinding demonstration
+![image](https://github.com/jonshung/PythonPathfinding/assets/110903974/5d6e4793-3dba-4f72-bf3d-f94b69c371c8)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <br>
 <br>
