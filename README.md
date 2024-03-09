@@ -39,9 +39,6 @@ dat = input.init_data("input.txt")
 gg = graph.Graph(dat.dim, dat.geo_data) 
 ```
 
-<br>
-<br>
-
 The graph object contains the `grid` property, which is a 1 dimension array containing m * n Node elements, for m and n is the dimension of the graph.
 With any arbitrary x and y, we can use the function `graph.to_local_coord([x, y])` to translate from 2d coordinate to 1d coordinate of the `grid` list.
 Each run of any algorithm might modify data fields in the graph's node, such as visited property, cost property, from_node, ... It is essential to reset the graph without having to draw the shapes again.
@@ -91,8 +88,11 @@ which returns a float, containing the time of execution of an algorithm in the c
 For checkpoints, we can compute a route starting from the starting position, and ends in the ending position. This path must go through all checkpoints in any order such that the route has minimum cost.
 This can be interpreted as an Open TSP problem.
 The algorithm used to solve this is located in the `tsp.tsp` module, which utilize Dijkstra algorithm and Held-Karp algorithm to construct a pseudo graph, in which the vertices are the points to go through, and edges are path from each node to every other nodes.
+
 <br>
 In a graph, the method `graph.dynamic_geo`:
+
+<br>
 
 ```python
 (method) def dynamic_geo(
@@ -101,4 +101,5 @@ In a graph, the method `graph.dynamic_geo`:
     h: Any
 ) -> None
 ```
+
 can be used to move all shapes in one direction of h distance, `direction` can range from 0 -> 3, with 0 means moving all shapes in positive y axis, 1 moves shapes in positive x axis, 2 move shapes in negative y axis and 3 move shapes in negative x axis.
