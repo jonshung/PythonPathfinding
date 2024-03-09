@@ -84,7 +84,7 @@ def held_karp(dists):
     # Calculate optimal cost
     res = []
     for k in range(1, n):
-        res.append((C[(bits, k)][0], k))
+        res.append((C[(bits, k)][0] + dists[k][0], k))
     opt, parent = min(res)
 
     # Backtrack to find full path
