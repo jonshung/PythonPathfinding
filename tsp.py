@@ -138,7 +138,7 @@ def reconstruct_path(dat: InputData, grid: Graph, order: list) -> bool:
         node_data = path[node_i]
         tgt = grid.grid[grid.to_local_coord(node_data[1])]
         tgt.visited = True
-        tgt.block = -1
+        tgt.block = -2
         tgt.cost = node_data[0]
         if(node_i > 0):
             if(path[node_i - 1][1] != node_data[1]):

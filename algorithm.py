@@ -199,7 +199,7 @@ def Dijkstra(dat: InputData, grid: Graph, cutoff = 0) -> bool:
             mod = 1.41
         g = grid.grid[grid.to_local_coord(u)].cost + mod
         return (g, g)
-    return BestFirst(dat, grid, eval, 2, 0, cutoff) # eval pos = 2 will cause the algorithm to run forever, until no more node is to be expanded
+    return BestFirst(dat, grid, eval, 2, cutoff) # eval pos = 2 will cause the algorithm to run forever, until no more node is to be expanded
 
 def Astar(dat: InputData, grid: Graph, cutoff = 0) -> bool:
     def eval(grid: Graph, s, e, u, n):
