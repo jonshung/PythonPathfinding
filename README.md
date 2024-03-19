@@ -15,8 +15,10 @@ The general input data format is a text file, whose content is defined as follow
 -  The first line contain the size of the 2D grid, separated by comma.
 > An optional 3rd value can be used to define the visualization height.
 - The second line contain the starting coordinate, the ending coordinate, and optional checkpoints which the result path must go through before reaching the end, all separated by commas.
-- The third line contains an integer, be the number of shapes to be drawn on the graph. Each subsequent line contains the "anchor" points of each shape, which are then connected clockwisely such that the inner area of the shape is maximum.
+- The third line contains an integer `n`, be the number of shapes to be drawn on the graph. Each subsequent line contains the "anchor" points of each shape, which are then connected clockwisely such that the inner area of the shape is maximum.
 - Shapes are set of points in which the algorithm can't move to or through.
+- After `n` line, there is an optional line. This line provide functionality for dynamic graphing. The minimum argument for this line is 3 entries, denoting the move speed of each algorithm call; the shapes' move direction and the shapes' move speed.
+- An optional fourth entry can be used to determine the number of `hold frames` when the algorithm find the target and waiting to be restarted if `hold frame >= 0`
 Example:
 ```text
 22,18,6
@@ -24,8 +26,18 @@ Example:
 3
 4,4,5,9,8,10,9,5
 8,12,8,17,13,12
-11,1,11,6,14,6,14,1 
+11,1,11,6,14,6,14,1
+3,6,1,-1
 ```
+<br>
+
+## Use through interface
+The running task can be trivialized by importing a single `pathfinding` module and any `algorithm` method that is used. \
+<br>
+
+The `pathfinding` module provide an easy to use `run` method or `run_multi` to run the graph multiple time.
+`run` and `run_multi` both takes an input file name and an algorithm function as their two positional arguments. `run_multi` can take a third integer argument determining the interval at which the graph is updated (in milisecond). The default is 1000. \
+If not running through the `pathfinding` interface, we can manually run the scripts through the following steps:
 <br>
 
 ## Retrieving input data and initializing the graph
