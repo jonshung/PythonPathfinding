@@ -118,7 +118,7 @@ def update(frame, grid: Graph, input_data: InputData, callback, time = [], show_
         checkpoints.append(x)
     checkpoints.append(input_data.end)
 
-    voxel_map = build_voxel_map(grid, checkpoints, show_expansion=show_expansion)
+    voxel_map = build_voxel_map(grid, checkpoints, show_expansion=show_expansion, found=input_data.found)
     labels = [''] * 5
     labels[0] = "size=[%d, %d]" % (input_data.dim[0], input_data.dim[1])
     labels[1] = "start=%s" % (checkpoints[0])
