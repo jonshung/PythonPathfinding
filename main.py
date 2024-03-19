@@ -1,4 +1,5 @@
 import pathfinding
+import algorithm
 
 if __name__ == "__main__":
-    pathfinding.run_multi("input.txt", 1000)
+    pathfinding.run("input.txt", algorithm.Astar)

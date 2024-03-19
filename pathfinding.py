@@ -4,6 +4,7 @@ import input
 import graph
 import time
 import algorithm
+from typing import Callable, Any
 
 vispy = None
 def import_mod(name):
@@ -33,24 +34,25 @@ if(backend == -1):
 else:
     backend = import_mod('visualize_gpu')
 
-def run(input_file):
+def run(input_file, algo: Callable[[input.InputData, graph.Graph], Any]):
     if(backend == -1):
         raise RuntimeError("Error: no backend detected")
     dat = input.init_data(input_file)
     gg = graph.Graph(dat.dim, dat.geo_data) 
     start_time = time.time()
-    if(not algorithm.Astar(dat, gg)):
+    dat.found = algo(dat, gg)
+    if(not dat.found):
         gg.grid[gg.to_local_coord(dat.end)].cost = -1
     end_time = time.time()
     backend.show_graph(gg, dat, end_time - start_time, True)
 
-def run_multi(input_file, interval = 1000):
+def run_multi(input_file, algo: Callable[[input.InputData, graph.Graph], Any], interval = 1000):
     if(backend == -1):
         raise RuntimeError("Error: no backend detected")
     dat = input.init_data(input_file)
     gg = graph.Graph(dat.dim, dat.geo_data) 
     start_time = time.time()
-    algorithm.Astar(dat, gg, dat.move_speed)
+    algo(dat, gg, dat.move_speed)
     end_time = time.time()
 
     def dynamic_geo_updater(graph: graph.Graph, input_data: input.InputData) -> float:
@@ -66,7 +68,7 @@ def run_multi(input_file, interval = 1000):
         graph.partial_reset(False)
         graph.dynamic_geo(input_data.geo_directon, input_data.geo_h)
         start_time = time.time()
-        input_data.found = algorithm.Astar(input_data, graph, dat.move_speed)
+        input_data.found = algo(input_data, graph, dat.move_speed)
         if(input_data.found):
             input_data.start = input_data.org_start
         end_time = time.time()
