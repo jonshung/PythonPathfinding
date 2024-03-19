@@ -3,4 +3,4 @@ import algorithm
 import tsp
 
 if __name__ == "__main__":
-    pathfinding.run("input.txt", algorithm.Astar)
+    pathfinding.run_multi("input.txt", algorithm.Astar, 1000)

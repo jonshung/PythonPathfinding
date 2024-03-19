@@ -217,7 +217,7 @@ def Astar(dat: InputData, grid: Graph, cutoff = 0) -> bool:
         return (g, h + g)
     return BestFirst(dat, grid, eval, 0, cutoff)
 
-def IDAstar(dat: InputData, grid: Graph):
+def IDAstar(dat: InputData, grid: Graph, cutoff = 0):
     grid.grid[grid.to_local_coord(dat.start)].visited = True
     grid.grid[grid.to_local_coord(dat.start)].cost = 0
     bound = list(evalAstar(grid, dat.start, dat.end, dat.start, dat.start))
@@ -236,7 +236,7 @@ def IDAstar(dat: InputData, grid: Graph):
         for x in range(len(path)):
             path_node = grid.grid[grid.to_local_coord(path[x])]
             path_node.visited = True
-            path_node.block = -1
+            path_node.block = -2
             if(x != 0):
                 path_node.from_node = path[x - 1]
     return found
